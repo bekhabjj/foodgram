@@ -140,3 +140,11 @@ dmypy.json
 
 static/
 media/
+
+requests.http
+
+.DS_Store
+
+TODO
+
+parsing
