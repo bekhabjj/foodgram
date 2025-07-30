@@ -14,7 +14,7 @@ class IsAuthorOrReadOnly(permissions.IsAuthenticatedOrReadOnly):
             request: Запрос пользователя
             view: Представление, обрабатывающее запрос
             obj: Проверяемый объект
-            
+
         Returns:
             bool: True если доступ разрешен, False если запрещен
         """

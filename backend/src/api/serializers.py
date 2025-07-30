@@ -32,7 +32,7 @@ class ExtendedUserSerializer(UserSerializer):
 
     def get_is_subscribed(self, author):
         """Проверяет, подписан ли текущий пользователь на автора.
-        
+
         Args:
             author: Автор, на которого проверяется подписка
             

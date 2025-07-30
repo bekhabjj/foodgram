@@ -36,12 +36,12 @@ class RecipeFilter(FilterSet):
 
     def filter_is_favorited(self, recipes, name, value):
         """Фильтрует рецепты по наличию в избранном у текущего пользователя.
-        
+
         Args:
             recipes: QuerySet рецептов
             name: имя поля фильтра
             value: значение фильтра (True/False)
-            
+
         Returns:
             QuerySet: отфильтрованные рецепты
         """
@@ -50,13 +50,16 @@ class RecipeFilter(FilterSet):
         return recipes
 
     def filter_is_in_shopping_cart(self, recipes, name, value):
-        """Фильтрует рецепты по наличию в корзине покупок у текущего пользователя.
-        
+        """Фильтрует рецепты по наличию в корзине покупок.
+
+        Проверяет, добавлены ли рецепты в корзину покупок текущего
+        аутентифицированного пользователя.
+
         Args:
             recipes: QuerySet рецептов
             name: имя поля фильтра
             value: значение фильтра (True/False)
-            
+
         Returns:
             QuerySet: отфильтрованные рецепты
         """
