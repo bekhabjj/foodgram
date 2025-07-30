@@ -206,10 +206,10 @@ class GetRecipeSerializer(BaseRecipeSerializer):
 
     def get_is_in_shopping_cart(self, recipe):
         """Проверяет, добавлен ли рецепт в корзину покупок.
-        
+
         Args:
             recipe: Проверяемый рецепт
-            
+
         Returns:
             bool: True если рецепт в корзине, False в противном случае
         """
@@ -230,14 +230,14 @@ class WriteRecipeSerializer(BaseRecipeSerializer):
 
     def check_data(self, data, name):
         """Проверяет данные на наличие дубликатов и пустых значений.
-        
+
         Args:
             data: Проверяемые данные
             name: Название поля для сообщения об ошибке
-            
+
         Raises:
             ValidationError: Если данные пустые или содержат дубликаты
-            
+
         Returns:
             Проверенные данные
         """
@@ -277,7 +277,7 @@ class WriteRecipeSerializer(BaseRecipeSerializer):
 
     def fill_ingredients(self, recipe, ingredients):
         """Заполняет рецепт ингредиентами.
-        
+
         Args:
             recipe: Рецепт для заполнения
             ingredients: Список ингредиентов
@@ -292,10 +292,10 @@ class WriteRecipeSerializer(BaseRecipeSerializer):
 
     def create(self, validated_data):
         """Создает новый рецепт.
-        
+
         Args:
             validated_data: Валидированные данные рецепта
-            
+
         Returns:
             Recipe: Созданный рецепт
         """
@@ -308,7 +308,7 @@ class WriteRecipeSerializer(BaseRecipeSerializer):
 
     def update(self, instance, validated_data):
         """Обновляет существующий рецепт.
-        
+
         Args:
             instance: Рецепт для обновления
             validated_data: Валидированные данные
