@@ -134,7 +134,6 @@ class FoodgramUserAdmin(UserAdmin, RecipesCountMixin):
     def authors_count(self, user):
         return user.authors.count()
 
-    @mark_safe
     @admin.display(description="Аватар")
     def avatar_preview(self, user):
         return (
@@ -221,12 +220,10 @@ class RecipeAdmin(admin.ModelAdmin):
     def favorited_count(self, recipe):
         return recipe.favorites.count()
 
-    @mark_safe
     @admin.display(description="Теги")
     def view_tags(self, recipe):
         return "<br>".join(tag.name for tag in recipe.tags.all())
 
-    @mark_safe
     @admin.display(description="Продукты")
     def view_ingredients(self, recipe):
         return "<br>".join(
@@ -237,7 +234,6 @@ class RecipeAdmin(admin.ModelAdmin):
             for ingr in recipe.ingredients_in_recipe.all()
         )
 
-    @mark_safe
     @admin.display(description="Превью")
     def image_preview(self, recipe):
         return (
