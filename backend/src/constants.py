@@ -1,37 +1,27 @@
-MAX_EMAIL_LENGHT = 254
+from foodgram.settings import AVATARS_URL
 
-MAX_USERNAME_LENGHT = 150
+# Максимальная длина поля.
+TAG_MAX_LENGTH = 32
+SHORT_MAX_LENGTH = 64
+MID_MAX_LENGTH = 128
+MAX_LENGTH = 150
+LONG_MAX_LENGTH = 254
 
-USERNAME_CHECK = r"^[\w.@+-]+\Z"
+# Размеры картинки для админки.
+ADMIN_PIC_DOTS = 50
 
-MAX_USERNAME_LENGHT = 150
-
-MAX_FIRST_NAME_LENGHT = 150
-
-MAX_LAST_NAME_LENGHT = 150
-
-MAX_ROLE_LENGHT = 15
-
-MAX_TAG_LENGHT = 32
-
-MAX_SLUG_LENGHT = 32
-
-MAX_INGREDIENT_NAME_LENGHT = 128
-
-MAX_MEASUREMENT_UNIT_LENGHT = 64
-
-MAX_RECIPE_NAME_LENGHT = 256
-
-MIN_COOKING_TIME = 1
-
-MAX_SHORT_LINK_LENGHT = 20
-
+# Допустимые паттерны.
+USERNAME_PATTERN = r'^[\w.@+-]+\Z'
+# Аватар пользователя по умолчанию.
+DEFAULT_USER_AVATAR = f'{AVATARS_URL}/default_user_avatar.jpg'
+# Минимальное время готовки.
+MIN_COOKING_MINUTES = 1
+# Минимальное количество ингредиента.
 MIN_INGREDIENT_AMOUNT = 1
 
-MAX_INGREDIENT_AMOUNT = 1000
-
-MAX_PAGE_SIZE = 10
-
-NOT_ALLOWED_USERNAME = "me"
-
-URL = "127.0.0.1:8000/s/"
+# Имя файла для выгрузки списка покупок продуктов.
+SHOPPING_CART_FILENAME = 'shopping_cart.txt'
+# Заготовки для форматирования вывода списка покупок.
+header_layout = 'СПИСОК ПОКУПОК (составлен {})'
+products_layout = "{}. {} ({}) - {}"
+recipes_layout = "{} @{}"

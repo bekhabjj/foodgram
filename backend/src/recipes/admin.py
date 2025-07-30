@@ -1,136 +1,224 @@
 from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin
+from django.contrib.auth.models import Group
+from django.utils.safestring import mark_safe
 
+from constants import ADMIN_PIC_DOTS
 from recipes.models import (
-    Favorite,
-    Ingredient,
-    Recipe,
-    RecipeIngredient,
-    ShoppingCart,
-    Tag,
+    Favorite, Ingredient, IngredientInRecipe, Recipe, ShoppingCart, Subscribe,
+    Tag, User
 )
+
+admin.site.unregister(Group)
+
+
+class BaseFilter(admin.SimpleListFilter):
+    """Базовый класс для фильтра рецептов и подписок."""
+
+    SELECTIONS = (
+        ('0', 'Нет'),
+        ('1', 'Есть'),
+    )
+
+    def lookups(self, request, model_admin):
+        return self.SELECTIONS
+
+    def queryset(self, request, queryset):
+        # self.value() может быть None, если фильтр не выбран
+        if self.value() == '0':
+            return queryset.filter(**self.filter_kwargs())
+        if self.value() == '1':
+            return queryset.exclude(**self.filter_kwargs())
+        # Если ни одно из условий не сработало, возвращаем исходный queryset
+        return queryset
+
+    def filter_kwargs(self):
+        return {f"{self.parameter_name}__exact": None}
+
+
+class RecipeFilter(BaseFilter):
+
+    title = 'Наличие рецептов'
+    parameter_name = 'recipes'
+    SELECTIONS = (
+        ('0', 'Нет рецептов'),
+        ('1', 'Есть рецепты'),
+    )
+
+
+class FollowsFilter(BaseFilter):
+
+    title = 'Есть подписки'
+    parameter_name = 'follows'
+    SELECTIONS = (
+        ('0', 'Нет подписок'),
+        ('1', 'Есть подписки'),
+    )
+
+
+class IsFollowedFilter(BaseFilter):
+
+    title = 'Есть подписчики'
+    parameter_name = 'authors'
+    SELECTIONS = (
+        ('0', 'Нет подписчиков'),
+        ('1', 'Есть подписчики'),
+    )
+
+
+class RecipesCountMixin:
+    """Подсчет количества рецептов, связанных с объектом смежной модели."""
+
+    list_display = ['recipes_count', ]
+
+    @admin.display(description='Рецептов')
+    def recipes_count(self, obj):
+        return obj.recipes.count()
+
+
+@admin.register(User)
+class FoodgramUserAdmin(UserAdmin, RecipesCountMixin):
+    """Админка для пользователей."""
+
+    list_display = [
+        'avatar_preview', 'id', 'username', 'name', 'email', 'is_staff',
+        *RecipesCountMixin.list_display,
+        'subscribed_count', 'authors_count'
+    ]
+    list_display_links = ('username', )
+    fieldsets = (
+        (('Пользователь'), {'fields': (
+            'username', 'avatar', 'first_name', 'last_name', 'email'
+        )}),
+        (('Статус'), {'fields': ('is_active', 'is_staff', 'is_superuser'), }),
+        (('Даты'), {'fields': ('last_login', 'date_joined')}),
+    )
+    readonly_fields = ['avatar_preview']
+    search_fields = ('email', 'username')
+    list_filter = (
+        *UserAdmin.list_filter,
+        RecipeFilter,
+        FollowsFilter,
+        IsFollowedFilter
+    )
+    @admin.display(description='ФИО')
+    def name(self, user):
+        return f'{user.first_name} {user.last_name}'
+
+    @admin.display(description='Подписок')
+    def subscribed_count(self, user):
+        return user.follows.count()
+
+    @admin.display(description='Подписчиков')
+    def authors_count(self, user):
+        return user.authors.count()
+
+    @mark_safe
+    @admin.display(description='Аватар')
+    def avatar_preview(self, user):
+        return (
+            f'<img src="{user.avatar}" width="{ADMIN_PIC_DOTS}" '
+            f'height="{ADMIN_PIC_DOTS}"/>'
+        )
+
+
+@admin.register(Subscribe)
+class SubscribeAdmin(admin.ModelAdmin):
+    """Админка для подписок."""
+
+    list_display = ('user', 'subscribed')
+    search_fields = ('user__username', 'subscribed__username')
+
+
+class RecipeIngredientsInline(admin.StackedInline):
+    model = IngredientInRecipe
+    extra = 0
+    verbose_name = 'продукт'
+    verbose_name_plural = 'Продукты'
 
 
 @admin.register(Tag)
-class TagAdmin(admin.ModelAdmin):
-    """Класс настройки раздела тегов."""
+class TagAdmin(RecipesCountMixin, admin.ModelAdmin):
+    """Админка для тегов."""
 
-    list_display = ("pk", "name", "slug")
-    list_display_links = ("pk", "name")
-    empty_value_display = "значение отсутствует"
-    search_fields = ("name",)
-    prepopulated_fields = {"slug": ("name",)}
+    list_display = ['name', 'slug', *RecipesCountMixin.list_display]
+    search_fields = ('name', 'slug')
+    counter_description = 'Рецептов с тегом'
+
+
+class UsedIngredientFilter(BaseFilter):
+    title = 'Используются в рецептах'
+
+    parameter_name = 'recipes'
+
+    SELECTIONS = (
+        ('0', 'Неиспользуемые'),
+        ('1', 'Используемые'),
+    )
+
 
 
 @admin.register(Ingredient)
-class IngredientAdmin(admin.ModelAdmin):
-    """Класс настройки раздела ингредиентов."""
+class IngredientAdmin(RecipesCountMixin, admin.ModelAdmin):
+    """Админка для продуктов."""
 
-    list_display = ("pk", "name", "measurement_unit")
-    list_display_links = ("pk", "name")
-    empty_value_display = "значение отсутствует"
-    search_fields = ("name",)
-
-
-class IngredientAmountInline(admin.TabularInline):
-    """Класс, позволяющий добавлять ингредиенты в рецепты."""
-
-    model = RecipeIngredient
-    min_num = 1
+    list_display = [
+        'name', 'measurement_unit', *RecipesCountMixin.list_display
+    ]
+    list_display_links = ('name',)
+    search_fields = ('name', 'measurement_unit')
+    list_filter = ('measurement_unit', UsedIngredientFilter)
 
 
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
-    """Класс настройки раздела рецептов."""
+    """Админка для рецептов."""
 
     list_display = (
-        "pk",
-        "name",
-        "author",
-        "text",
-        "get_tags",
-        "get_ingredients",
-        "cooking_time",
-        "image",
-        "pub_date",
-        "count_favorite",
+        'image_preview', 'id', 'name', 'cooking_time', 'author', 'view_tags',
+        'favorited_count', 'view_ingredients'
     )
-    inlines = [IngredientAmountInline]
-    list_display_links = ("pk", "name")
-    empty_value_display = "значение отсутствует"
-    list_filter = ("tags", "author")
-    search_fields = ("name",)
+    fields = (
+        'name', 'favorited_count', 'author', 'text', 'tags',
+        'cooking_time', 'pub_date',
+    )
+    list_display_links = ('name', )
+    readonly_fields = ('image_preview', 'favorited_count', 'pub_date')
+    search_fields = ('author__username', 'name', 'tags__name')
+    list_filter = ('tags', 'author')
+    inlines = (RecipeIngredientsInline, )
 
-    def get_queryset(self, request):
-        """Получение рецепта."""
-        queryset = super().get_queryset(request)
-        queryset = queryset.select_related("author").prefetch_related(
-            "tags", "recipe_ingredients__ingredient"
+    @admin.display(description='В избранном')
+    def favorited_count(self, recipe):
+        return recipe.favorites.count()
+
+    @mark_safe
+    @admin.display(description='Теги')
+    def view_tags(self, recipe):
+        return '<br>'.join(tag.name for tag in recipe.tags.all())
+
+    @mark_safe
+    @admin.display(description='Продукты')
+    def view_ingredients(self, recipe):
+        return '<br>'.join(
+            (
+                f'{ingr.ingredient.name} {ingr.amount} '
+                f'{ingr.ingredient.measurement_unit}'
+            ) for ingr in recipe.ingredients_in_recipe.all()
         )
-        return queryset
 
-    def get_ingredients(self, object):
-        """Получает ингредиент или список ингредиентов рецепта."""
-        return "\n".join(
-            (ingredient.name for ingredient in object.ingredients.all())
+    @mark_safe
+    @admin.display(description='Превью')
+    def image_preview(self, recipe):
+        return (
+            f'<img src="{recipe.image}" width="{ADMIN_PIC_DOTS}" '
+            f'height="{ADMIN_PIC_DOTS}"/>'
         )
 
-    get_ingredients.short_description = "ингредиенты"
 
-    def get_tags(self, object):
-        """Получает тег или список тегов рецепта."""
-        return "\n".join((tag.name for tag in object.tags.all()))
+@admin.register(Favorite, ShoppingCart)
+class FavoriteShoppingCartAdmin(admin.ModelAdmin):
+    """Админка для избранного."""
 
-    get_tags.short_description = "теги"
-
-    def count_favorite(self, object):
-        """Вычисляет количество добавлений рецепта в избранное."""
-        return object.favorite.count()
-
-    count_favorite.short_description = "Количество добавлений в избранное"
-
-
-@admin.register(RecipeIngredient)
-class RecipeIngredientAdmin(admin.ModelAdmin):
-    """Класс настройки соответствия игредиентов и рецептов."""
-
-    list_display = ("pk", "recipe", "ingredient", "amount")
-    empty_value_display = "значение отсутствует"
-
-
-@admin.register(Favorite)
-class FavoriteAdmin(admin.ModelAdmin):
-    """Класс настройки раздела избранного."""
-
-    list_display = ("pk", "user", "recipe")
-
-    def get_queryset(self, request):
-        """Получает избранное."""
-        queryset = super().get_queryset(request)
-        queryset = queryset.select_related(
-            "user", "recipe__author"
-        ).prefetch_related(
-            "recipe__tags", "recipe__recipe_ingredients__ingredient"
-        )
-        return queryset
-
-    empty_value_display = "значение отсутствует"
-
-
-@admin.register(ShoppingCart)
-class ShoppingCartAdmin(admin.ModelAdmin):
-    """Класс настройки раздела рецептов, которые добавлены в список покупок."""
-
-    list_display = ("pk", "user", "recipe")
-    list_display_links = ("pk", "user")
-
-    def get_queryset(self, request):
-        """Получает объект списка покупок."""
-        queryset = super().get_queryset(request)
-        queryset = queryset.select_related(
-            "user", "recipe__author"
-        ).prefetch_related(
-            "recipe__tags", "recipe__recipe_ingredients__ingredient"
-        )
-        return queryset
-
-    empty_value_display = "значение отсутствует"
+    list_display = ('user', 'recipe')
+    search_fields = ('user__username', 'recipe__name')

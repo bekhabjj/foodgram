@@ -24,6 +24,6 @@ COPY --from=builder /usr/local/bin /usr/local/bin
 # Копируем код приложения из builder-образа
 COPY --from=builder /app /app
 
-ENTRYPOINT ["/app/entrypoint.sh"] 
+ENTRYPOINT ["/app/entrypoint.sh"]
 
 CMD ["gunicorn", "--bind", "0:8000", "src.foodgram.wsgi:application"]
