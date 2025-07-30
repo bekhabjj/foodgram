@@ -1,7 +1,9 @@
 from django_filters.rest_framework import (
-    BooleanFilter, CharFilter, FilterSet, ModelMultipleChoiceFilter
+    BooleanFilter,
+    CharFilter,
+    FilterSet,
+    ModelMultipleChoiceFilter,
 )
-
 from recipes.models import Ingredient, Recipe, Tag
 
 
@@ -12,7 +14,7 @@ class IngredientFilter(FilterSet):
 
     class Meta:
         model = Ingredient
-        fields = ['name', ]
+        fields = ['name']
 
 
 class RecipeFilter(FilterSet):
@@ -33,11 +35,31 @@ class RecipeFilter(FilterSet):
     )
 
     def filter_is_favorited(self, recipes, name, value):
+        """Фильтрует рецепты по наличию в избранном у текущего пользователя.
+        
+        Args:
+            recipes: QuerySet рецептов
+            name: имя поля фильтра
+            value: значение фильтра (True/False)
+            
+        Returns:
+            QuerySet: отфильтрованные рецепты
+        """
         if value and self.request.user.is_authenticated:
             return recipes.filter(favorites__user=self.request.user)
         return recipes
 
     def filter_is_in_shopping_cart(self, recipes, name, value):
+        """Фильтрует рецепты по наличию в корзине покупок у текущего пользователя.
+        
+        Args:
+            recipes: QuerySet рецептов
+            name: имя поля фильтра
+            value: значение фильтра (True/False)
+            
+        Returns:
+            QuerySet: отфильтрованные рецепты
+        """
         if value and self.request.user.is_authenticated:
             return recipes.filter(shoppingcarts__user=self.request.user)
         return recipes
