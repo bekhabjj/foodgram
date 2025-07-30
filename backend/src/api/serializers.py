@@ -35,7 +35,7 @@ class ExtendedUserSerializer(UserSerializer):
 
         Args:
             author: Автор, на которого проверяется подписка
-            
+
         Returns:
             bool: True если подписка существует, False в противном случае
         """
@@ -64,10 +64,10 @@ class SubscribeUserSerializer(ExtendedUserSerializer):
 
     def get_recipes(self, author):
         """Получает список рецептов автора с ограничением количества.
-        
+
         Args:
             author: Автор рецептов
-            
+
         Returns:
             list: Список сериализованных рецептов
         """
@@ -108,10 +108,10 @@ class WriteIngredientInRecipeSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         """Преобразует объект в формат для чтения.
-        
+
         Args:
             instance: Экземпляр модели IngredientInRecipe
-            
+
         Returns:
             dict: Сериализованные данные
         """
@@ -176,11 +176,11 @@ class GetRecipeSerializer(BaseRecipeSerializer):
 
     def get_mark(self, recipe, model):
         """Общий метод для проверки отметок (избранное/корзина).
-        
+
         Args:
             recipe: Проверяемый рецепт
             model: Модель для проверки (Favorite или ShoppingCart)
-            
+
         Returns:
             bool: True если отметка существует, False в противном случае
         """
@@ -195,10 +195,10 @@ class GetRecipeSerializer(BaseRecipeSerializer):
 
     def get_is_favorited(self, recipe):
         """Проверяет, добавлен ли рецепт в избранное.
-        
+
         Args:
             recipe: Проверяемый рецепт
-            
+
         Returns:
             bool: True если рецепт в избранном, False в противном случае
         """
