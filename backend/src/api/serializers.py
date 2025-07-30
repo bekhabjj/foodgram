@@ -312,7 +312,7 @@ class WriteRecipeSerializer(BaseRecipeSerializer):
         Args:
             instance: Рецепт для обновления
             validated_data: Валидированные данные
-            
+
         Returns:
             Recipe: Обновленный рецепт
         """
@@ -331,10 +331,10 @@ class WriteRecipeSerializer(BaseRecipeSerializer):
 
     def to_representation(self, instance):
         """Преобразует рецепт в формат для чтения.
-        
+
         Args:
             instance: Экземпляр рецепта
-            
+
         Returns:
             dict: Сериализованные данные рецепта
         """

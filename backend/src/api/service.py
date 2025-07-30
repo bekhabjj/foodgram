@@ -6,7 +6,6 @@ from constants import header_layout, products_layout, recipes_layout
 
 def shopping_list_render(recipes, products):
     """Получает сеты рецептов и продуктов и возвращает список покупок."""
-
     original_locale = locale.getlocale(locale.LC_ALL)
 
     try:
